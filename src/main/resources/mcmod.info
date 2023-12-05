@@ -1,13 +1,13 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
+  "modid": "backpacks",
+  "name": "Ghzdude's Backpacks",
+  "description": "Another backpack mod.",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["CleanroomMC"],
+  "authorList": ["Ghzdude"],
   "credits": "Authors of this project",
   "logoFile": "",
   "screenshots": [],
