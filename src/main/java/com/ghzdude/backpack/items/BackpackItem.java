@@ -34,18 +34,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BackpackItem extends Item implements IGuiHolder {
-
-    int slots;
-    List<SyncHandler> syncHandlers = new ArrayList<>(slots);
+    int tier;
+    SyncHandler[] syncHandlers;
     public static final String SYNC_NAME = "backpack_inventory";
-    public BackpackItem(String name) {
-        ResourceLocation resourceLocation = new ResourceLocation(BackpacksMod.MODID, name);
-        setRegistryName(resourceLocation);
+    public BackpackItem(ResourceLocation name, int tier) {
+        this.tier = tier;
+        syncHandlers = new SyncHandler[tier * 3 * 9];
+        setRegistryName(name);
         setCreativeTab(CreativeTabs.TOOLS);
-        setTranslationKey(resourceLocation.getNamespace() + "." + resourceLocation.getPath());
+        setTranslationKey(name.getNamespace() + "." + name.getPath());
         setMaxStackSize(1);
         BackpackItems.ITEMS.add(this);
-        slots = 9;
     }
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
@@ -61,13 +60,17 @@ public class BackpackItem extends Item implements IGuiHolder {
         guiSyncManager.registerSlotGroup(SYNC_NAME, 9);
 
         ModularPanel panel = new ModularPanel("backpack_gui").align(Alignment.Center);
-        SlotGroupWidget.Builder slotBuilder = SlotGroupWidget.builder()
-                .row("XXXXXXXXX")
-                .key('X', i -> {
-                    ItemSlot slot = new ItemSlot().slot(SyncHandlers.itemSlot(itemHandler, i).slotGroup(SYNC_NAME));
-                    syncHandlers.add(slot.getSyncHandler());
-                    return slot;
-                });
+        SlotGroupWidget.Builder slotBuilder = SlotGroupWidget.builder();
+
+        for (int i = 0; i < tier * 3; i++) {
+            slotBuilder.row("XXXXXXXXX");
+        }
+
+        slotBuilder.key('X', i -> {
+            ItemSlot slot = new ItemSlot().slot(SyncHandlers.itemSlot(itemHandler, i).slotGroup(SYNC_NAME));
+            syncHandlers[i] = slot.getSyncHandler();
+            return slot;
+        });
 
         IWidget title = IKey.str("Inventory").asWidget().top(4).left(4);
         IWidget slotGroupWidget = slotBuilder.build().top(4 + 12).leftRel(0.5f);
@@ -81,6 +84,6 @@ public class BackpackItem extends Item implements IGuiHolder {
     @Nullable
     @Override
     public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable NBTTagCompound nbt) {
-        return new ItemStackItemHandler(stack, slots);
+        return new ItemStackItemHandler(stack, syncHandlers.length);
     }
 }
