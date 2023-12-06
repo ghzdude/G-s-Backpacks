@@ -14,6 +14,12 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
 public class BackpackItem extends Item {
+
+    BackpackItem() {
+        setTranslationKey("diamond");
+        setMaxStackSize(1);
+    }
+
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
         if (worldIn.isRemote) {
