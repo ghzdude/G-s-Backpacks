@@ -37,7 +37,7 @@ public class BackpackItem extends Item implements IGuiHolder {
 
     int slots;
     List<SyncHandler> syncHandlers = new ArrayList<>(slots);
-    public static final String SYNC_NAME = "inventory";
+    public static final String SYNC_NAME = "backpack_inventory";
     public BackpackItem(String name) {
         ResourceLocation resourceLocation = new ResourceLocation(BackpacksMod.MODID, name);
         setRegistryName(resourceLocation);
