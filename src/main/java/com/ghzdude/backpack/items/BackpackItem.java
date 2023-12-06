@@ -60,7 +60,7 @@ public class BackpackItem extends Item implements IGuiHolder {
         IItemHandlerModifiable itemHandler = (IItemHandlerModifiable) guiCreationContext.getUsedItemStack().getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
         guiSyncManager.registerSlotGroup(SYNC_NAME, 9);
 
-        ModularPanel panel = new ModularPanel("backpack_gui").align(Alignment.Center).width(192);
+        ModularPanel panel = new ModularPanel("backpack_gui").align(Alignment.Center);
         SlotGroupWidget.Builder slotBuilder = SlotGroupWidget.builder()
                 .row("XXXXXXXXX")
                 .key('X', i -> {
@@ -69,14 +69,12 @@ public class BackpackItem extends Item implements IGuiHolder {
                     return slot;
                 });
 
-        IWidget slotGroupWidget = slotBuilder.build().top(18);
-        IWidget title = IKey.str("Inventory").asWidget();
-        panel.child(new Column()
-                .padding(18)
-                .child(title)
+        IWidget title = IKey.str("Inventory").asWidget().top(4).left(4);
+        IWidget slotGroupWidget = slotBuilder.build().top(4 + 12).leftRel(0.5f);
+
+        panel.child(title)
                 .child(slotGroupWidget)
-                .child(SlotGroupWidget.playerInventory().align(Alignment.Center))
-        );
+                .bindPlayerInventory();
         return panel;
     }
 
