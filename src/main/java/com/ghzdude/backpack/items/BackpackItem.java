@@ -18,7 +18,7 @@ public class BackpackItem extends Item implements IForgeRegistryEntry<Item> {
 
     public BackpackItem(String name) {
         setRegistryName(BackpacksMod.MODID, name);
-        setTranslationKey("diamond");
+        setTranslationKey("backpack." + name);
         setMaxStackSize(1);
     }
 
