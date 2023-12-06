@@ -8,6 +8,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 @Mod(modid = BackpacksMod.MODID,
      name = "Ghzdude's Backpacks",
+     version = "0.1",
      acceptedMinecraftVersions = "[1.12.2,1.13)",
      dependencies = "required:forge; required-after:modularui@[2.3.1,)")
 public class BackpacksMod {

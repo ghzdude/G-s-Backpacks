@@ -5,23 +5,27 @@ import com.cleanroommc.modularui.manager.ClientGUI;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.ModularScreen;
 import com.ghzdude.backpack.BackpacksMod;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
-public class BackpackItem extends Item implements IForgeRegistryEntry<Item> {
+public class BackpackItem extends Item {
 
     public BackpackItem(String name) {
-        setRegistryName(BackpacksMod.MODID, name);
-        setTranslationKey("backpack." + name);
+        ResourceLocation resourceLocation = new ResourceLocation(BackpacksMod.MODID, name);
+        setRegistryName(resourceLocation);
+        setCreativeTab(CreativeTabs.TOOLS);
+        setTranslationKey(resourceLocation.getNamespace() + "." + resourceLocation.getPath());
         setMaxStackSize(1);
+        BackpackItems.ITEMS.add(this);
     }
-
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
         if (worldIn.isRemote) {
