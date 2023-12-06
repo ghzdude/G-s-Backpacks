@@ -9,5 +9,5 @@ public class BackpackItems {
 
     public static final List<Item> ITEMS = new ArrayList<>();
 
-    public static Item basicBackpack = new BackpackItem("basic");
+    public static final Item BASIC_BACKPACK = new BackpackItem("basic");
 }
