@@ -12,10 +12,12 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
-public class BackpackItem extends Item {
+public class BackpackItem extends Item implements IForgeRegistryEntry<Item> {
 
-    BackpackItem() {
+    public BackpackItem(String name) {
+        setRegistryName(BackpacksMod.MODID, name);
         setTranslationKey("diamond");
         setMaxStackSize(1);
     }
@@ -35,4 +37,5 @@ public class BackpackItem extends Item {
                 .top(7).left(7));
         return new ModularScreen(BackpacksMod.MODID, panel);
     }
+
 }

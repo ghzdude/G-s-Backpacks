@@ -12,9 +12,4 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
      dependencies = "required:forge; required-after:modularui@[2.3.1,)")
 public class BackpacksMod {
     public static final String MODID = "backpacks";
-
-    @SubscribeEvent
-    public void itemRegister(RegistryEvent.Register<Item> event) {
-        event.getRegistry().register(BackpackItems.backpackItem);
-    }
 }
