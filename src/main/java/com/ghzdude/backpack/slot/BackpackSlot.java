@@ -4,8 +4,7 @@ import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class BackpackSlot extends ModularSlot {
 
@@ -14,7 +13,7 @@ public class BackpackSlot extends ModularSlot {
     }
 
     @Override
-    public void putStack(@Nonnull ItemStack stack) {
+    public void putStack(@NotNull ItemStack stack) {
         super.putStack(stack);
     }
 

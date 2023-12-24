@@ -3,8 +3,7 @@ package com.ghzdude.backpack.handler;
 import com.cleanroommc.modularui.utils.ItemStackItemHandler;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class BackpackHandler extends ItemStackItemHandler {
 
@@ -16,7 +15,7 @@ public class BackpackHandler extends ItemStackItemHandler {
     }
 
     @Override
-    public @Nonnull ItemStack getStackInSlot(int slot) {
+    public @NotNull ItemStack getStackInSlot(int slot) {
         ItemStack stack = super.getStackInSlot(slot);
         NBTTagCompound item = getCompound(slot);
         if (!item.hasKey(TRUE_AMOUNT)) {
@@ -28,7 +27,7 @@ public class BackpackHandler extends ItemStackItemHandler {
     }
 
     @Override
-    public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
+    public void setStackInSlot(int slot, @NotNull ItemStack stack) {
         NBTTagCompound item = getCompound(slot);
         int size = Math.min(stack.getCount() + getStackInSlot(slot).getCount(), MAX_AMOUNT);
         item.setInteger(TRUE_AMOUNT, size);
@@ -41,7 +40,7 @@ public class BackpackHandler extends ItemStackItemHandler {
     }
 
     @Override
-    protected int getStackLimit(int slot, @Nonnull ItemStack stack) {
+    protected int getStackLimit(int slot, @NotNull ItemStack stack) {
         return getSlotLimit(slot);
     }
 
