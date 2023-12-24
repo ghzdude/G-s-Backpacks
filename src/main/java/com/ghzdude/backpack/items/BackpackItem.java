@@ -12,6 +12,7 @@ import com.cleanroommc.modularui.value.sync.GuiSyncManager;
 import com.cleanroommc.modularui.value.sync.SyncHandler;
 import com.cleanroommc.modularui.widgets.ItemSlot;
 import com.cleanroommc.modularui.widgets.SlotGroupWidget;
+import com.ghzdude.backpack.handler.BackpackHandler;
 import com.ghzdude.backpack.slot.BackpackSlot;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -32,11 +33,11 @@ import javax.annotation.Nullable;
 
 public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
     int tier;
-    SyncHandler[] syncHandlers;
     public static final String SYNC_NAME = "backpack_inventory";
+
+    private static final int[] BACKPACK_SIZES = new int[] {1000000, 4000000, 16000000};
     public BackpackItem(ResourceLocation name, int tier) {
         this.tier = tier;
-        syncHandlers = new SyncHandler[tier * 3 * 9];
         setRegistryName(name);
         setCreativeTab(CreativeTabs.TOOLS);
         setTranslationKey(name.getNamespace() + "." + name.getPath());
@@ -59,19 +60,15 @@ public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
         ModularPanel panel = new ModularPanel("backpack_gui").align(Alignment.Center);
         SlotGroupWidget.Builder slotBuilder = SlotGroupWidget.builder();
 
-        for (int i = 0; i < tier * 3; i++) {
+        for (int i = 0; i < (tier + 1) * 3; i++) {
             slotBuilder.row("XXXXXXXXX");
         }
 
-        slotBuilder.key('X', i -> {
-            ItemSlot slot = new ItemSlot().slot(
-                    new BackpackSlot(itemHandler, i, tier * 1000000)
-                            .slotGroup(SYNC_NAME)
-                            .filter(itemStack -> !BackpackItems.ITEMS.contains(itemStack.getItem()))
-            );
-            syncHandlers[i] = slot.getSyncHandler();
-            return slot;
-        });
+        slotBuilder.key('X', i -> new ItemSlot().slot(
+                new BackpackSlot(itemHandler, i)
+                        .slotGroup(SYNC_NAME)
+                        .filter(itemStack -> !BackpackItems.ITEMS.contains(itemStack.getItem()))
+        ));
 
         IWidget title = IKey.str("Inventory").asWidget().top(4).left(4);
         IWidget slotGroupWidget = slotBuilder.build().top(4 + 12).leftRel(0.5f);
@@ -85,6 +82,6 @@ public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
     @Nullable
     @Override
     public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable NBTTagCompound nbt) {
-        return new ItemStackItemHandler(stack, syncHandlers.length);
+        return new BackpackHandler(stack, (tier + 1) * 27, BACKPACK_SIZES[tier]);
     }
 }
