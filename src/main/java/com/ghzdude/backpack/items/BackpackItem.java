@@ -3,18 +3,19 @@ package com.ghzdude.backpack.items;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
-import com.cleanroommc.modularui.manager.GuiCreationContext;
-import com.cleanroommc.modularui.manager.GuiInfos;
+import com.cleanroommc.modularui.factory.HandGuiData;
+import com.cleanroommc.modularui.factory.ItemGuiFactory;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.utils.ItemStackItemHandler;
 import com.cleanroommc.modularui.value.sync.GuiSyncManager;
 import com.cleanroommc.modularui.value.sync.SyncHandler;
-import com.cleanroommc.modularui.value.sync.SyncHandlers;
 import com.cleanroommc.modularui.widgets.ItemSlot;
 import com.cleanroommc.modularui.widgets.SlotGroupWidget;
+import com.ghzdude.backpack.slot.BackpackSlot;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -29,7 +30,7 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 
 import javax.annotation.Nullable;
 
-public class BackpackItem extends Item implements IGuiHolder {
+public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
     int tier;
     SyncHandler[] syncHandlers;
     public static final String SYNC_NAME = "backpack_inventory";
@@ -45,15 +46,15 @@ public class BackpackItem extends Item implements IGuiHolder {
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
         if (!worldIn.isRemote) {
-            GuiInfos.getForHand(handIn).open(playerIn);
+            ItemGuiFactory.open((EntityPlayerMP) playerIn, playerIn.getActiveHand());
         }
         return ActionResult.newResult(EnumActionResult.SUCCESS, playerIn.getHeldItem(handIn));
     }
 
     @Override
-    public ModularPanel buildUI(GuiCreationContext guiCreationContext, GuiSyncManager guiSyncManager, boolean isClient) {
-        IItemHandlerModifiable itemHandler = (IItemHandlerModifiable) guiCreationContext.getUsedItemStack().getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-        guiSyncManager.registerSlotGroup(SYNC_NAME, 9);
+    public ModularPanel buildUI(HandGuiData data, GuiSyncManager syncManager) {
+        IItemHandlerModifiable itemHandler = (IItemHandlerModifiable) data.getUsedItemStack().getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        syncManager.registerSlotGroup(SYNC_NAME, 9);
 
         ModularPanel panel = new ModularPanel("backpack_gui").align(Alignment.Center);
         SlotGroupWidget.Builder slotBuilder = SlotGroupWidget.builder();
@@ -63,7 +64,11 @@ public class BackpackItem extends Item implements IGuiHolder {
         }
 
         slotBuilder.key('X', i -> {
-            ItemSlot slot = new ItemSlot().slot(SyncHandlers.itemSlot(itemHandler, i).slotGroup(SYNC_NAME));
+            ItemSlot slot = new ItemSlot().slot(
+                    new BackpackSlot(itemHandler, i, tier * 1000000)
+                            .slotGroup(SYNC_NAME)
+                            .filter(itemStack -> !BackpackItems.ITEMS.contains(itemStack.getItem()))
+            );
             syncHandlers[i] = slot.getSyncHandler();
             return slot;
         });
