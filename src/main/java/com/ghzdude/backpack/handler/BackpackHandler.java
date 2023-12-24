@@ -21,9 +21,9 @@ public class BackpackHandler extends ItemStackItemHandler {
         NBTTagCompound item = getCompound(slot);
         if (!item.hasKey(TRUE_AMOUNT)) {
             item.setInteger(TRUE_AMOUNT, stack.getCount());
+        } else {
+            stack.setCount(getCompound(slot).getInteger(TRUE_AMOUNT));
         }
-        int trueAmount = getCompound(slot).getInteger(TRUE_AMOUNT);
-        stack.setCount(trueAmount);
         return stack;
     }
 
