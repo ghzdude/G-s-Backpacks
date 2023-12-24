@@ -106,7 +106,7 @@ dependencies {
     // Example of deobfuscating a dependency
     // implementation rfg.deobf('curse.maven:had-enough-items-557549:4543375')
     runtimeOnly rfg.deobf('curse.maven:had-enough-items-557549:4543375')
-    implementation rfg.deobf('curse.maven:modularui-624243:4856895')
+    implementation("com.cleanroommc:modularui:2.4.1") { transitive = false }
 
     if (project.use_mixins.toBoolean()) {
         // Change your mixin refmap name here:
