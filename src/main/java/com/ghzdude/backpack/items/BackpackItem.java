@@ -56,11 +56,11 @@ public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
         syncManager.registerSlotGroup(SYNC_NAME, 9);
 
         ModularPanel panel = new ModularPanel("backpack_gui").align(Alignment.Center);
-        SlotGroupWidget.Builder slotBuilder = SlotGroupWidget.builder();
+        SlotGroupWidget.Builder slotBuilder = SlotGroupWidget.builder().row("X"); // testing
 
-        for (int i = 0; i < (tier + 1) * 3; i++) {
-            slotBuilder.row("XXXXXXXXX");
-        }
+//        for (int i = 0; i < (tier + 1) * 3; i++) {
+//            slotBuilder.row("XXXXXXXXX");
+//        }
 
         slotBuilder.key('X', i -> new ItemSlot().slot(
                 new BackpackSlot(itemHandler, i)
