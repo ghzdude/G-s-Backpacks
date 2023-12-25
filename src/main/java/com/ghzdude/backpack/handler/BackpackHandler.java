@@ -21,7 +21,8 @@ public class BackpackHandler extends ItemStackItemHandler {
         if (!item.hasKey(TRUE_AMOUNT)) {
             item.setInteger(TRUE_AMOUNT, stack.getCount());
         } else {
-            stack.setCount(getCompound(slot).getInteger(TRUE_AMOUNT));
+            stack.setCount(item.getInteger(TRUE_AMOUNT));
+            if (stack.isEmpty()) item.removeTag(TRUE_AMOUNT);
         }
         return stack;
     }
@@ -30,7 +31,7 @@ public class BackpackHandler extends ItemStackItemHandler {
     public void setStackInSlot(int slot, @NotNull ItemStack stack) {
         NBTTagCompound item = getCompound(slot);
         int size = Math.min(stack.getCount() + getStackInSlot(slot).getCount(), MAX_AMOUNT);
-        item.setInteger(TRUE_AMOUNT, size);
+        if (size > 0) item.setInteger(TRUE_AMOUNT, size);
         super.setStackInSlot(slot, stack);
     }
 
