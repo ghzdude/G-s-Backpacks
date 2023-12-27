@@ -52,15 +52,15 @@ public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
 
     @Override
     public ModularPanel buildUI(HandGuiData data, GuiSyncManager syncManager) {
-        IItemHandlerModifiable itemHandler = (IItemHandlerModifiable) data.getUsedItemStack().getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        IItemHandlerModifiable itemHandler = getHandler(data.getUsedItemStack());
         syncManager.registerSlotGroup(SYNC_NAME, 9);
 
         ModularPanel panel = new ModularPanel("backpack_gui").align(Alignment.Center);
-        SlotGroupWidget.Builder slotBuilder = SlotGroupWidget.builder().row("X"); // testing
+        SlotGroupWidget.Builder slotBuilder = SlotGroupWidget.builder();
 
-//        for (int i = 0; i < (tier + 1) * 3; i++) {
-//            slotBuilder.row("XXXXXXXXX");
-//        }
+        for (int i = 0; i < (tier + 1) * 3; i++) {
+            slotBuilder.row("XXXXXXXXX");
+        }
 
         slotBuilder.key('X', i -> new ItemSlot().slot(
                 new BackpackSlot(itemHandler, i)
@@ -81,5 +81,9 @@ public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
     @Override
     public ICapabilityProvider initCapabilities(@NotNull ItemStack stack, @Nullable NBTTagCompound nbt) {
         return new BackpackHandler(stack, (tier + 1) * 27, BACKPACK_SIZES[tier]);
+    }
+
+    protected IItemHandlerModifiable getHandler(ItemStack stack) {
+        return (IItemHandlerModifiable) stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
     }
 }
