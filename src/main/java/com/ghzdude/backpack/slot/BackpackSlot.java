@@ -21,4 +21,14 @@ public class BackpackSlot extends ModularSlot {
     public ItemStack onTake(EntityPlayer thePlayer, ItemStack stack) {
         return super.onTake(thePlayer, stack);
     }
+
+    @Override
+    public boolean isIgnoreMaxStackSize() {
+        return true;
+    }
+
+    @Override
+    public boolean isPhantom() {
+        return true;
+    }
 }
