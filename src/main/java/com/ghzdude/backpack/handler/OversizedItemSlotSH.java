@@ -2,14 +2,14 @@ package com.ghzdude.backpack.handler;
 
 import com.cleanroommc.modularui.utils.MouseData;
 import com.cleanroommc.modularui.value.sync.ItemSlotSH;
-import com.cleanroommc.modularui.widgets.slot.ModularSlot;
+import com.ghzdude.backpack.gui.slot.BackpackSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 @SuppressWarnings({"UnstableApiUsage"})
 public class OversizedItemSlotSH extends ItemSlotSH {
-    public OversizedItemSlotSH(ModularSlot slot) {
+    public OversizedItemSlotSH(BackpackSlot slot) {
         super(slot);
     }
 
@@ -63,26 +63,22 @@ public class OversizedItemSlotSH extends ItemSlotSH {
         ItemStack cursorStack = getSyncManager().getCursorItem();
         ItemStack slotStack = getSlot().getStack();
         ItemStack stackToPut;
-        if (!cursorStack.isEmpty() && !slotStack.isEmpty()) {
+        if (mouseData.shift && !slotStack.isEmpty()) {
+            stackToPut = slotStack.copy();
+            int removed = Math.min(slotStack.getCount(), slotStack.getMaxStackSize());
+
+            stackToPut.setCount(removed);
+            slotStack.shrink(removed);
+
+            getSlot().getHandler().setStackInSlot(getSlot().getSlotIndex(), slotStack);
+            getSyncManager().getPlayer().inventory.storeItemStack(stackToPut);
+        } else if (!cursorStack.isEmpty() && !slotStack.isEmpty()) {
             if (ItemHandlerHelper.canItemStacksStack(cursorStack, slotStack)) {
                 stackToPut = cursorStack.copy();
-                int max = getSlot().getSlotStackLimit();
-                int combined = slotStack.getCount() + cursorStack.getCount();
-
-                stackToPut.setCount(Math.min(max, combined));
                 cursorStack.shrink(stackToPut.getCount());
 
                 getSlot().putStack(stackToPut);
                 getSyncManager().setCursorItem(cursorStack);
-            } else if (mouseData.shift) {
-                stackToPut = slotStack.copy();
-                int removed = Math.min(slotStack.getCount(), slotStack.getMaxStackSize());
-
-                stackToPut.setCount(removed);
-                slotStack.shrink(removed);
-
-                getSlot().putStack(slotStack);
-                getSyncManager().getPlayer().inventory.storeItemStack(stackToPut);
             }
         } else if (slotStack.isEmpty() && !cursorStack.isEmpty()) {
             getSlot().putStack(cursorStack.copy());
@@ -92,11 +88,15 @@ public class OversizedItemSlotSH extends ItemSlotSH {
             int removed = Math.min(slotStack.getCount(), slotStack.getMaxStackSize());
             stackToPut.setCount(removed);
             slotStack.shrink(removed);
-            getSlot().putStack(slotStack);
 
             getSyncManager().setCursorItem(stackToPut);
             getSlot().putStack(slotStack);
         }
+    }
+
+    @Override
+    public BackpackSlot getSlot() {
+        return (BackpackSlot) super.getSlot();
     }
 
     protected void phantomScroll(MouseData mouseData) {

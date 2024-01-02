@@ -1,4 +1,4 @@
-package com.ghzdude.backpack.slot;
+package com.ghzdude.backpack.gui.slot;
 
 import com.cleanroommc.modularui.value.sync.SyncHandler;
 import com.cleanroommc.modularui.widgets.ItemSlot;
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 public final class OversizedItemSlot extends ItemSlot {
     @Override
     public ItemSlot slot(ModularSlot slot) {
-        SyncHandler sh = new OversizedItemSlotSH(slot);
+        SyncHandler sh = new OversizedItemSlotSH((BackpackSlot) slot);
         if (isValidSyncHandler(sh)){
             setSyncHandler(sh);
         }
