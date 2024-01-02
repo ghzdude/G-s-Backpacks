@@ -1,5 +1,6 @@
 package com.ghzdude.backpack.slot;
 
+import com.cleanroommc.modularui.value.sync.SyncHandler;
 import com.cleanroommc.modularui.widgets.ItemSlot;
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import com.ghzdude.backpack.handler.OversizedItemSlotSH;
@@ -10,7 +11,10 @@ import org.jetbrains.annotations.Nullable;
 public final class OversizedItemSlot extends ItemSlot {
     @Override
     public ItemSlot slot(ModularSlot slot) {
-        setSyncHandler(new OversizedItemSlotSH(slot));
+        SyncHandler sh = new OversizedItemSlotSH(slot);
+        if (isValidSyncHandler(sh)){
+            setSyncHandler(sh);
+        }
         return this;
     }
 
@@ -23,5 +27,4 @@ public final class OversizedItemSlot extends ItemSlot {
     public @Nullable ItemStack castGhostIngredientIfValid(@NotNull Object ingredient) {
         return null;
     }
-
 }

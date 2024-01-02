@@ -1,27 +1,16 @@
 package com.ghzdude.backpack.handler;
 
 import com.cleanroommc.modularui.utils.MouseData;
-import com.cleanroommc.modularui.value.sync.GuiSyncManager;
-import com.cleanroommc.modularui.value.sync.SyncHandler;
+import com.cleanroommc.modularui.value.sync.ItemSlotSH;
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.items.ItemHandlerHelper;
 
-import java.io.IOException;
-
-@SuppressWarnings({"OverrideOnly", "UnstableApiUsage"})
-public class OversizedItemSlotSH extends SyncHandler {
-    private final ModularSlot slot;
+@SuppressWarnings({"UnstableApiUsage"})
+public class OversizedItemSlotSH extends ItemSlotSH {
     public OversizedItemSlotSH(ModularSlot slot) {
-        super();
-        this.slot = slot;
-    }
-
-    @Override
-    public void init(String key, GuiSyncManager syncManager) {
-        super.init(key, syncManager);
-        syncManager.getContainer().registerSlot(this.slot);
+        super(slot);
     }
 
     @Override
@@ -46,7 +35,7 @@ public class OversizedItemSlotSH extends SyncHandler {
     }
 
     public void setEnabled(boolean enabled, boolean sync) {
-        this.slot.setEnabled(enabled);
+        getSlot().setEnabled(enabled);
         if (sync) {
             sync(4, buffer -> buffer.writeBoolean(enabled));
         }
@@ -60,7 +49,7 @@ public class OversizedItemSlotSH extends SyncHandler {
     }
 
     @Override
-    public void readOnServer(int id, PacketBuffer buf) throws IOException {
+    public void readOnServer(int id, PacketBuffer buf) {
         if (id == 2) {
             phantomClick(MouseData.readPacket(buf));
         } else if (id == 3) {
@@ -72,16 +61,41 @@ public class OversizedItemSlotSH extends SyncHandler {
 
     protected void phantomClick(MouseData mouseData) {
         ItemStack cursorStack = getSyncManager().getCursorItem();
-        ItemStack slotStack = this.slot.getStack();
+        ItemStack slotStack = getSlot().getStack();
         ItemStack stackToPut;
-        if (!cursorStack.isEmpty() && !slotStack.isEmpty() && ItemHandlerHelper.canItemStacksStack(cursorStack, slotStack)) {
-            stackToPut = cursorStack.copy();
-            stackToPut.setCount(slotStack.getCount() + cursorStack.getCount());
-            this.slot.putStack(stackToPut);
-        } else if (slotStack.isEmpty()) {
-            if (cursorStack.isEmpty()) return;
-            stackToPut = cursorStack.copy();
-            this.slot.putStack(stackToPut);
+        if (!cursorStack.isEmpty() && !slotStack.isEmpty()) {
+            if (ItemHandlerHelper.canItemStacksStack(cursorStack, slotStack)) {
+                stackToPut = cursorStack.copy();
+                int max = getSlot().getSlotStackLimit();
+                int combined = slotStack.getCount() + cursorStack.getCount();
+
+                stackToPut.setCount(Math.min(max, combined));
+                cursorStack.shrink(stackToPut.getCount());
+
+                getSlot().putStack(stackToPut);
+                getSyncManager().setCursorItem(cursorStack);
+            } else if (mouseData.shift) {
+                stackToPut = slotStack.copy();
+                int removed = Math.min(slotStack.getCount(), slotStack.getMaxStackSize());
+
+                stackToPut.setCount(removed);
+                slotStack.shrink(removed);
+
+                getSlot().putStack(slotStack);
+                getSyncManager().getPlayer().inventory.storeItemStack(stackToPut);
+            }
+        } else if (slotStack.isEmpty() && !cursorStack.isEmpty()) {
+            getSlot().putStack(cursorStack.copy());
+            getSyncManager().setCursorItem(ItemStack.EMPTY);
+        } else if (cursorStack.isEmpty() && !slotStack.isEmpty()) {
+            stackToPut = slotStack.copy();
+            int removed = Math.min(slotStack.getCount(), slotStack.getMaxStackSize());
+            stackToPut.setCount(removed);
+            slotStack.shrink(removed);
+            getSlot().putStack(slotStack);
+
+            getSyncManager().setCursorItem(stackToPut);
+            getSlot().putStack(slotStack);
         }
     }
 

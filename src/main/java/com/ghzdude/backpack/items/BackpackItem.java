@@ -6,12 +6,13 @@ import com.cleanroommc.modularui.factory.HandGuiData;
 import com.cleanroommc.modularui.factory.ItemGuiFactory;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.utils.Alignment;
+import com.cleanroommc.modularui.utils.ItemCapabilityProvider;
 import com.cleanroommc.modularui.value.sync.GuiSyncManager;
+import com.cleanroommc.modularui.value.sync.SyncHandlers;
 import com.cleanroommc.modularui.widgets.SlotGroupWidget;
 import com.cleanroommc.modularui.widgets.layout.Column;
 import com.cleanroommc.modularui.widgets.slot.SlotGroup;
 import com.ghzdude.backpack.handler.BackpackHandler;
-import com.ghzdude.backpack.slot.BackpackSlot;
 import com.ghzdude.backpack.slot.OversizedItemSlot;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -24,6 +25,7 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -35,6 +37,7 @@ public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
     public static final String SYNC_NAME = "backpack_inventory";
 
     private static final int[] BACKPACK_SIZES = new int[] {1000000, 4000000, 16000000};
+    private static final int[] SLOT_SIZES = new int[] {27, 27 * 2, 27 * 3};
     public BackpackItem(ResourceLocation name, int tier) {
         this.tier = tier;
         setRegistryName(name);
@@ -64,22 +67,30 @@ public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
         }
 
         slotBuilder.key('X', i -> new OversizedItemSlot()
-                .slot(new BackpackSlot(itemHandler, i)
+                .slot(SyncHandlers.phantomItemSlot(itemHandler, i)
                         .slotGroup(backpack)
                         .filter(itemStack -> !BackpackItems.ITEMS.contains(itemStack.getItem()))
         ));
 
-        return new ModularPanel("backpack_gui")
-                .child(new Column().margin(7).coverChildren().align(Alignment.Center)
-                    .child(IKey.str("Inventory").asWidget().height(18).marginBottom(2))
-                    .child(slotBuilder.build().coverChildren().marginBottom(2))
-                    .child(SlotGroupWidget.playerInventory()));
+        return new ModularPanel("backpack_gui").align(Alignment.Center)
+                .child(new Column().coverChildrenHeight().widthRel(1f).margin(7)
+                    .child(IKey.str("Inventory").asWidget().height(14).left(0).marginBottom(2))
+                    .child(slotBuilder.build().coverChildren().marginBottom(2)))
+                .child(SlotGroupWidget.playerInventory().bottom(7));
     }
 
     @Nullable
     @Override
     public ICapabilityProvider initCapabilities(@NotNull ItemStack stack, @Nullable NBTTagCompound nbt) {
-        return new BackpackHandler(stack, (tier + 1) * 27, BACKPACK_SIZES[tier]);
+        return new ItemCapabilityProvider() {
+            @Override
+            public <T> @Nullable T getCapability(@NotNull Capability<T> capability) {
+                if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+                    return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(new BackpackHandler(stack, SLOT_SIZES[tier], BACKPACK_SIZES[tier]));
+                }
+                return null;
+            }
+        };
     }
 
     protected IItemHandlerModifiable getHandler(ItemStack stack) {
