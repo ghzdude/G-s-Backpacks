@@ -2,25 +2,17 @@ package com.ghzdude.backpack.mixin;
 
 import com.cleanroommc.modularui.screen.ModularContainer;
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
-import com.cleanroommc.modularui.widgets.slot.SlotGroup;
-import com.ghzdude.backpack.BackpacksMod;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.item.ItemStack;
-import net.minecraft.launchwrapper.Launch;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import scala.tools.asm.Opcodes;
 import zone.rong.mixinbooter.ILateMixinLoader;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 @Mixin(ModularContainer.class)
