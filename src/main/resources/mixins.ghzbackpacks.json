@@ -1,0 +1,12 @@
+{
+  "package": "com.ghzdude.backpack.mixin",
+  "refmap": "mixins.ghzbackpacks.refmap.json",
+  "target": "@env(DEFAULT)",
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "GuiManagerMixin"
+  ],
+  "client": [],
+  "server": []
+}
