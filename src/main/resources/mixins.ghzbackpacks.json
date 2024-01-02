@@ -1,11 +1,11 @@
 {
-  "package": "com.ghzdude.backpack.mixin",
+  "package": "com.ghzdude.backpack.mixin.modularui",
   "refmap": "mixins.ghzbackpacks.refmap.json",
   "target": "@env(DEFAULT)",
   "minVersion": "0.8",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "GuiManagerMixin"
+    "ModularContainerMixin"
   ],
   "client": [],
   "server": [],
