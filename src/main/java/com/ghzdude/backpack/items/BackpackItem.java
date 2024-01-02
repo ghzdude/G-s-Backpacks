@@ -2,16 +2,17 @@ package com.ghzdude.backpack.items;
 
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.api.drawable.IKey;
-import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.factory.HandGuiData;
 import com.cleanroommc.modularui.factory.ItemGuiFactory;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.sync.GuiSyncManager;
-import com.cleanroommc.modularui.widgets.ItemSlot;
 import com.cleanroommc.modularui.widgets.SlotGroupWidget;
+import com.cleanroommc.modularui.widgets.layout.Column;
+import com.cleanroommc.modularui.widgets.slot.SlotGroup;
 import com.ghzdude.backpack.handler.BackpackHandler;
 import com.ghzdude.backpack.slot.BackpackSlot;
+import com.ghzdude.backpack.slot.OversizedItemSlot;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -53,28 +54,26 @@ public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
     @Override
     public ModularPanel buildUI(HandGuiData data, GuiSyncManager syncManager) {
         IItemHandlerModifiable itemHandler = getHandler(data.getUsedItemStack());
-        syncManager.registerSlotGroup(SYNC_NAME, 9);
+        var backpack = new SlotGroup(SYNC_NAME, 9, 200, true);
+        syncManager.registerSlotGroup(backpack);
 
-        ModularPanel panel = new ModularPanel("backpack_gui").align(Alignment.Center);
         SlotGroupWidget.Builder slotBuilder = SlotGroupWidget.builder();
 
         for (int i = 0; i < (tier + 1) * 3; i++) {
             slotBuilder.row("XXXXXXXXX");
         }
 
-        slotBuilder.key('X', i -> new ItemSlot().slot(
-                new BackpackSlot(itemHandler, i)
-                        .slotGroup(SYNC_NAME)
+        slotBuilder.key('X', i -> new OversizedItemSlot()
+                .slot(new BackpackSlot(itemHandler, i)
+                        .slotGroup(backpack)
                         .filter(itemStack -> !BackpackItems.ITEMS.contains(itemStack.getItem()))
         ));
 
-        IWidget title = IKey.str("Inventory").asWidget().top(4).left(4);
-        IWidget slotGroupWidget = slotBuilder.build().top(4 + 12).leftRel(0.5f);
-
-        panel.child(title)
-                .child(slotGroupWidget)
-                .bindPlayerInventory();
-        return panel;
+        return new ModularPanel("backpack_gui")
+                .child(new Column().margin(7).coverChildren().align(Alignment.Center)
+                    .child(IKey.str("Inventory").asWidget().height(18).marginBottom(2))
+                    .child(slotBuilder.build().coverChildren().marginBottom(2))
+                    .child(SlotGroupWidget.playerInventory()));
     }
 
     @Nullable
