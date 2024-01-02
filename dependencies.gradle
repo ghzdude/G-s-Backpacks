@@ -22,5 +22,5 @@
  * For more details, see https://docs.gradle.org/8.0.1/userguide/java_library_plugin.html#sec:java_library_configurations_graph
  */
 dependencies {
-    implementation("com.cleanroommc:modularui:2.4.1") { transitive = false }
+    implementation("com.cleanroommc:modularui:2.4.2") { transitive = false }
 }
