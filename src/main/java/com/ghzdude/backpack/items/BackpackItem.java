@@ -8,11 +8,11 @@ import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.utils.ItemCapabilityProvider;
 import com.cleanroommc.modularui.value.sync.GuiSyncManager;
+import com.cleanroommc.modularui.widgets.ItemSlot;
 import com.cleanroommc.modularui.widgets.SlotGroupWidget;
 import com.cleanroommc.modularui.widgets.layout.Column;
 import com.cleanroommc.modularui.widgets.slot.SlotGroup;
 import com.ghzdude.backpack.gui.slot.BackpackSlot;
-import com.ghzdude.backpack.gui.slot.OversizedItemSlot;
 import com.ghzdude.backpack.handler.BackpackHandler;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -66,7 +66,7 @@ public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
             slotBuilder.row("XXXXXXXXX");
         }
 
-        slotBuilder.key('X', i -> new OversizedItemSlot()
+        slotBuilder.key('X', i -> new ItemSlot()
                 .slot(new BackpackSlot(itemHandler, i)
                         .slotGroup(backpack)
                         .filter(itemStack -> !BackpackItems.ITEMS.contains(itemStack.getItem()))
