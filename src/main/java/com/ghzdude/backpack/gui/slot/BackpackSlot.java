@@ -17,16 +17,6 @@ public class BackpackSlot extends ModularSlot {
         return getSlotStackLimit();
     }
 
-    @Override
-    public void putStack(@NotNull ItemStack stack) {
-//        if (getHasStack()) {
-//            int max = getSlotStackLimit();
-//            int combined = getStack().getCount() + stack.getCount();
-//            stack.setCount(Math.min(max, combined));
-//        }
-        super.putStack(stack);
-    }
-
     public IItemHandlerModifiable getHandler() {
         return (IItemHandlerModifiable) getItemHandler();
     }
@@ -35,10 +25,5 @@ public class BackpackSlot extends ModularSlot {
     @Override
     public boolean isIgnoreMaxStackSize() {
         return true;
-    }
-
-    @Override
-    public boolean isPhantom() {
-        return false;
     }
 }
