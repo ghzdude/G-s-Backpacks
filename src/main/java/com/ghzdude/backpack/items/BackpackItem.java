@@ -64,53 +64,31 @@ public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
         var backpack = new SlotGroup(SYNC_NAME, 9, 200, true);
         syncManager.registerSlotGroup(backpack);
 
-        SlotGroupWidget.Builder slotBuilder = SlotGroupWidget.builder();
+        var builder = SlotGroupWidget.builder();
 
         for (int i = 0; i < (tier + 1); i++) {
-            slotBuilder.row("XXXXXXXXX");
+            builder.row("XXXXXXXXX");
         }
 
-        slotBuilder.key('X', i -> new ItemSlot()
+        builder.key('X', i -> new ItemSlot()
                 .slot(new BackpackSlot(itemHandler, i)
                         .slotGroup(backpack)
                         .filter(itemStack -> !BackpackItems.ITEMS.contains(itemStack.getItem()))
         ));
 
         return new ModularPanel("backpack_gui").align(Alignment.Center)
-                .child(new Column().coverChildrenHeight().widthRel(1f).margin(7, 0)
-                    .child(IKey.str("Inventory").asWidget().left(0).margin(0, 2))
-                    .child(slotBuilder.build().coverChildren().marginBottom(2)))
-                .child(createPlayerInventory(syncManager));
-    }
-
-    private static IWidget createPlayerInventory(GuiSyncManager manager) {
-        IItemHandler player = manager.getPlayerInventory();
-        SlotGroup playerSG = new SlotGroup("player_slots", 9, 0, true);
-        SlotGroupWidget slotGroupWidget = new SlotGroupWidget();
-
-        slotGroupWidget
-                .debugName("player_inventory")
-                .flex().coverChildren()
-                .startDefaultMode()
-                .leftRel(0.5f)
-                .endDefaultMode()
-                .bottom(7);
-        for (int i = 0; i < 9; i++) {
-            slotGroupWidget.child(new ItemSlot()
-                    .slot(new PlayerSlot(player, i)
-                            .slotGroup(playerSG))
-                    .pos(i * 18, 3 * 18 + 5)
-                    .debugName("slot_" + i));
-        }
-        for (int i = 0; i < 27; i++) {
-            slotGroupWidget.child(new ItemSlot()
-                    .slot(new ModularSlot(player, i + 9)
-                            .slotGroup(playerSG))
-                    .pos(i % 9 * 18, i / 9 * 18)
-                    .debugName("slot_" + (i + 9)));
-        }
-
-        return slotGroupWidget;
+                .padding(4, 7)
+                .child(new Column().sizeRel(1.0f)
+                        .child(new Column().coverChildren()
+                                .child(IKey.str("Inventory").asWidget()
+                                        .left(0)
+                                        .marginBottom(2))
+                                .child(builder.build()
+                                    .coverChildren()
+                                    .marginBottom(4)))
+                        .child(SlotGroupWidget.playerInventory()
+                                .leftRel(0.5f)
+                                .bottom(0)));
     }
 
     @Nullable
