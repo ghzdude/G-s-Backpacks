@@ -23,4 +23,5 @@
  */
 dependencies {
     implementation("com.cleanroommc:modularui:2.4.2") { transitive = false }
+    implementation rfg.deobf("curse.maven:inventory-bogosorter-632327:4951607-deobf-4951608-sources-4951609")
 }
