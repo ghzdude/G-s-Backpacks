@@ -3,21 +3,47 @@ package com.ghzdude.backpack.handler;
 import com.cleanroommc.modularui.utils.ItemStackItemHandler;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.NonNullList;
+import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 
 public class BackpackHandler extends ItemStackItemHandler {
-    private final NonNullList<ItemStack> stacks;
     private final int MAX_AMOUNT;
     private static final String COUNT = "Count";
 
     public BackpackHandler(ItemStack container, int slots, int maxAmount) {
         super(container, slots);
         this.MAX_AMOUNT = maxAmount;
-        this.stacks = NonNullList.withSize(slots, ItemStack.EMPTY);
-        for (int i = 0; i < slots; i++) {
-            this.stacks.set(i, getStackInSlot(i));
+    }
+
+    @Override
+    public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
+        if (stack.isEmpty()) return ItemStack.EMPTY;
+        ItemStack existing = getStackInSlot(slot);
+
+        int limit = getStackLimit(slot, stack);
+
+        if (!existing.isEmpty()) {
+            if (!ItemHandlerHelper.canItemStacksStack(stack, existing))
+                return stack;
+
+            limit -= existing.getCount();
         }
+
+        if (limit <= 0) return stack;
+
+        boolean reachedLimit = stack.getCount() > limit;
+
+        if (!simulate) {
+            if (existing.isEmpty()) {
+                setStackInSlot(slot, reachedLimit ? ItemHandlerHelper.copyStackWithSize(stack, limit) : stack);
+            } else {
+                existing.grow(reachedLimit ? limit : stack.getCount());
+                setStackInSlot(slot, existing);
+            }
+            onContentsChanged(slot);
+        }
+
+        return reachedLimit ? ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - limit) : ItemStack.EMPTY;
     }
 
     @Override
@@ -26,20 +52,14 @@ public class BackpackHandler extends ItemStackItemHandler {
         int size = item.getInteger(COUNT);
         ItemStack stack = super.getStackInSlot(slot);
         stack.setCount(size);
-
-        if (!ItemStack.areItemStacksEqual(stack, stacks.get(slot)))
-            stacks.set(slot, stack);
-
-        return stacks.get(slot);
+        return stack;
     }
 
     @Override
     public void setStackInSlot(int slot, @NotNull ItemStack stack) {
         super.setStackInSlot(slot, stack);
-        stacks.set(slot, stack);
         NBTTagCompound item = getCompound(slot);
-        int size = Math.min(stacks.get(slot).getCount(), MAX_AMOUNT);
-        if (size > 0) item.setInteger(COUNT, size);
+        item.setInteger(COUNT, stack.getCount());
     }
 
     @Override
