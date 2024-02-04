@@ -78,6 +78,6 @@ public class BackpackHandler extends ItemStackItemHandler {
     }
 
     protected NBTTagCompound getCompound(int slot) {
-        return (NBTTagCompound) getItemsNbt().get(slot);
+        return getItemsNbt().getCompoundTagAt(slot);
     }
 }
