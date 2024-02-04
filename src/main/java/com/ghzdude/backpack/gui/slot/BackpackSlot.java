@@ -55,10 +55,12 @@ public class BackpackSlot extends BogoSlot implements ISlotOverride {
                 }
             } else if (fromSlot.canTakeStack(player)) {
                 if (heldStack.isEmpty() && !slotStack.isEmpty()) {
-                    if (slotStack.getCount() > slotStack.getMaxStackSize())
-                        slotStack.setCount(slotStack.getMaxStackSize());
 
-                    int toRemove = mouseButton == LEFT_MOUSE ? slotStack.getCount() : (slotStack.getCount() + 1) / 2;
+                    int toRemove = Math.min(slotStack.getMaxStackSize(),
+                            mouseButton == LEFT_MOUSE ?
+                                slotStack.getCount() :
+                                (slotStack.getCount() + 1) / 2);
+
                     inventoryplayer.setItemStack(slotStack.splitStack(toRemove));
                     fromSlot.putStack(slotStack);
 
@@ -76,6 +78,7 @@ public class BackpackSlot extends BogoSlot implements ISlotOverride {
                         heldStack.shrink(stackCount);
                         slotStack.grow(stackCount);
                         fromSlot.putStack(slotStack);
+                        inventoryplayer.setItemStack(heldStack);
 
                     } else if (heldStack.getCount() <= fromSlot.getItemStackLimit(heldStack)) {
                         fromSlot.putStack(heldStack);

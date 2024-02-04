@@ -17,12 +17,14 @@ public class BackpackHandler extends ItemStackItemHandler {
 
     @Override
     public boolean isItemValid(int slot, @NotNull ItemStack stack) {
-        return !insertItem(slot, stack, true).isEmpty();
+        return insertItem(slot, stack, true).isEmpty();
     }
 
     @Override
     public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
-        if (stack.isEmpty()) return ItemStack.EMPTY;
+        if (stack.isEmpty() || stack.hasTagCompound())
+            return stack;
+
         ItemStack existing = getStackInSlot(slot);
 
         int limit = getStackLimit(slot, stack);
