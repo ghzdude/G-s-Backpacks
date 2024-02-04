@@ -85,6 +85,12 @@ public abstract class ModularContainerMixin extends Container {
         return super.canMergeSlot(stack, slotIn);
     }
 
+    @WrapOperation(method = "transferItem",
+            at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I"))
+    private int wrapMin(int slotLimit, int stackLimit, Operation<Integer> min, @Local(ordinal = 1) ModularSlot toSlot) {
+        return toSlot.isIgnoreMaxStackSize() ? slotLimit : min.call(slotLimit, stackLimit);
+    }
+
     @Unique
     private boolean backpacks$validSlot(int slot) {
         return slot >= 0 && slot < this.slots.size();
