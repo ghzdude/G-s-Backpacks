@@ -51,9 +51,13 @@ public class BackpackSlot extends BogoSlot implements ISlotOverride {
                     }
 
                     fromSlot.putStack(heldStack.splitStack(stackCount));
+                    inventoryplayer.setItemStack(heldStack);
                 }
             } else if (fromSlot.canTakeStack(player)) {
                 if (heldStack.isEmpty() && !slotStack.isEmpty()) {
+                    if (slotStack.getCount() > slotStack.getMaxStackSize())
+                        slotStack.setCount(slotStack.getMaxStackSize());
+
                     int toRemove = mouseButton == LEFT_MOUSE ? slotStack.getCount() : (slotStack.getCount() + 1) / 2;
                     inventoryplayer.setItemStack(slotStack.splitStack(toRemove));
                     fromSlot.putStack(slotStack);
@@ -67,10 +71,6 @@ public class BackpackSlot extends BogoSlot implements ISlotOverride {
 
                         if (stackCount > fromSlot.getItemStackLimit(heldStack) - slotStack.getCount()) {
                             stackCount = fromSlot.getItemStackLimit(heldStack) - slotStack.getCount();
-                        }
-
-                        if (stackCount > heldStack.getMaxStackSize() - slotStack.getCount()) {
-                            stackCount = heldStack.getMaxStackSize() - slotStack.getCount();
                         }
 
                         heldStack.shrink(stackCount);
@@ -129,7 +129,7 @@ public class BackpackSlot extends BogoSlot implements ISlotOverride {
                     }
 
                     if (fromStack.isEmpty()) {
-                        return new Result<>(false, fromStack);
+                        return new Result<>(false, ItemStack.EMPTY);
                     }
                 } else if (toStack.isEmpty()) {
                     emptySlots.add(toSlot);
@@ -137,12 +137,13 @@ public class BackpackSlot extends BogoSlot implements ISlotOverride {
             }
         }
         for (ModularSlot emptySlot : emptySlots) {
-            if (fromStack.getCount() > emptySlot.getSlotStackLimit()) {
-                emptySlot.putStack(fromStack.splitStack(emptySlot.getSlotStackLimit()));
+            if (fromStack.getCount() > fromStack.getMaxStackSize()) {
+                emptySlot.putStack(fromStack.splitStack(fromStack.getMaxStackSize()));
             } else {
                 emptySlot.putStack(fromStack.splitStack(fromStack.getCount()));
             }
-            if (fromStack.getCount() < 1) {
+            if (fromStack.isEmpty()) {
+                fromSlot.putStack(fromStack);
                 break;
             }
         }
