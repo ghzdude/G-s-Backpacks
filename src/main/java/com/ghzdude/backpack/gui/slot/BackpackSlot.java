@@ -131,7 +131,8 @@ public class BackpackSlot extends BogoSlot implements ISlotOverride {
                     if (fromStack.isEmpty()) {
                         return new Result<>(false, ItemStack.EMPTY);
                     }
-                } else if (toStack.isEmpty()) {
+                }
+                else if (toStack.isEmpty()) {
                     emptySlots.add(toSlot);
                 }
             }
@@ -139,13 +140,12 @@ public class BackpackSlot extends BogoSlot implements ISlotOverride {
         for (ModularSlot emptySlot : emptySlots) {
             if (fromStack.getCount() > fromStack.getMaxStackSize()) {
                 emptySlot.putStack(fromStack.splitStack(fromStack.getMaxStackSize()));
-            } else {
+            }
+            else {
                 emptySlot.putStack(fromStack.splitStack(fromStack.getCount()));
             }
-            if (fromStack.isEmpty()) {
-                fromSlot.putStack(fromStack);
-                break;
-            }
+            fromSlot.putStack(fromStack);
+            break;
         }
         return new Result<>(false, fromStack);
     }
