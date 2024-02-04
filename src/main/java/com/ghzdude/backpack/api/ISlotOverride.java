@@ -11,15 +11,28 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public interface ISlotOverride {
-    Result<ItemStack> transferStackInSlot(EntityPlayer playerIn, int index, List<ModularSlot> slots);
+    int LEFT_MOUSE = 0;
+    int RIGHT_MOUSE = 1;
 
-    Result<ItemStack> slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player, int dragEvent, int dragMode);
+    default Result<ItemStack> transferStackInSlot(EntityPlayer playerIn, ModularSlot fromSlot, List<ModularSlot> slots) {
+        return new Result<>(true);
+    }
 
-    Result<Boolean> canDragIntoSlot(Slot slotIn);
+    default Result<ItemStack> slotClick(ModularSlot fromSlot, int mouseButton, ClickType clickTypeIn, EntityPlayer player, int dragEvent, int dragMode) {
+        return new Result<>(true);
+    }
 
-    Result<Void> onContainerClosed(EntityPlayer playerIn);
+    default Result<Boolean> canDragIntoSlot(Slot slotIn) {
+        return new Result<>(true);
+    }
 
-    Result<Boolean> canMergeSlot(ItemStack stack, Slot slotIn);
+    default Result<Void> onContainerClosed(EntityPlayer playerIn) {
+        return new Result<>(true);
+    }
+
+    default Result<Boolean> canMergeSlot(ItemStack stack, Slot slotIn) {
+        return new Result<>(true);
+    }
 
     class Result<T> {
 

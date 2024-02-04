@@ -1,22 +1,22 @@
 package com.ghzdude.backpack.gui.slot;
 
-import com.cleanroommc.bogosorter.api.ISlot;
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
+import com.cleanroommc.modularui.widgets.slot.SlotGroup;
 import com.ghzdude.backpack.api.ISlotOverride;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.ClickType;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-@Optional.Interface(modid = "bogosort", iface = "com.cleanroommc.bogosorter.api.ISlot")
-public class BackpackSlot extends ModularSlot implements ISlot, ISlotOverride {
+public class BackpackSlot extends BogoSlot implements ISlotOverride {
 
     public BackpackSlot(IItemHandler itemHandler, int index) {
         super(itemHandler, index);
@@ -27,118 +27,125 @@ public class BackpackSlot extends ModularSlot implements ISlot, ISlotOverride {
         return getSlotStackLimit();
     }
 
-    public IItemHandlerModifiable getHandler() {
-        return (IItemHandlerModifiable) getItemHandler();
-    }
-
-
     @Override
     public boolean isIgnoreMaxStackSize() {
         return true;
     }
 
     @Override
-    public Slot bogo$getRealSlot() {
-        return this;
-    }
+    public Result<ItemStack> slotClick(ModularSlot fromSlot, int mouseButton, ClickType clickTypeIn, EntityPlayer player, int dragEvent, int dragMode) {
+        ItemStack returnable = ItemStack.EMPTY;
+        InventoryPlayer inventoryplayer = player.inventory;
 
-    @Override
-    public int bogo$getX() {
-        return this.xPos;
-    }
+        if ((clickTypeIn == ClickType.PICKUP) &&
+                (mouseButton == LEFT_MOUSE || mouseButton == RIGHT_MOUSE)) {
+            ItemStack slotStack = fromSlot.getStack().copy();
+            ItemStack heldStack = inventoryplayer.getItemStack().copy();
 
-    @Override
-    public int bogo$getY() {
-        return this.yPos;
-    }
+            if (slotStack.isEmpty()) {
+                if (!heldStack.isEmpty() && fromSlot.isItemValid(heldStack)) {
+                    int stackCount = mouseButton == LEFT_MOUSE ? heldStack.getCount() : 1;
 
-    @Override
-    public int bogo$getSlotNumber() {
-        return this.slotNumber;
-    }
+                    if (stackCount > fromSlot.getItemStackLimit(heldStack)) {
+                        stackCount = fromSlot.getItemStackLimit(heldStack);
+                    }
 
-    @Override
-    public int bogo$getSlotIndex() {
-        return this.getSlotIndex();
-    }
+                    fromSlot.putStack(heldStack.splitStack(stackCount));
+                }
+            } else if (fromSlot.canTakeStack(player)) {
+                if (heldStack.isEmpty() && !slotStack.isEmpty()) {
+                    int toRemove = mouseButton == LEFT_MOUSE ? slotStack.getCount() : (slotStack.getCount() + 1) / 2;
+                    inventoryplayer.setItemStack(slotStack.splitStack(toRemove));
+                    fromSlot.putStack(slotStack);
 
-    @Override
-    public IInventory bogo$getInventory() {
-        return this.inventory;
-    }
+                    fromSlot.onTake(player, inventoryplayer.getItemStack());
+                } else if (fromSlot.isItemValid(heldStack)) {
+                    if (slotStack.getItem() == heldStack.getItem() &&
+                            slotStack.getMetadata() == heldStack.getMetadata() &&
+                            ItemStack.areItemStackTagsEqual(slotStack, heldStack)) {
+                        int stackCount = mouseButton == LEFT_MOUSE ? heldStack.getCount() : 1;
 
-    @Override
-    public void bogo$putStack(ItemStack itemStack) {
-        putStack(itemStack);
-    }
+                        if (stackCount > fromSlot.getItemStackLimit(heldStack) - slotStack.getCount()) {
+                            stackCount = fromSlot.getItemStackLimit(heldStack) - slotStack.getCount();
+                        }
 
-    @Override
-    public ItemStack bogo$getStack() {
-        return getStack();
-    }
+                        if (stackCount > heldStack.getMaxStackSize() - slotStack.getCount()) {
+                            stackCount = heldStack.getMaxStackSize() - slotStack.getCount();
+                        }
 
-    @Override
-    public int bogo$getMaxStackSize(ItemStack itemStack) {
-        return getItemStackLimit(itemStack);
-    }
+                        heldStack.shrink(stackCount);
+                        slotStack.grow(stackCount);
+                        fromSlot.putStack(slotStack);
 
-    @Override
-    public int bogo$getItemStackLimit(ItemStack itemStack) {
-        return getItemStackLimit(itemStack);
-    }
+                    } else if (heldStack.getCount() <= fromSlot.getItemStackLimit(heldStack)) {
+                        fromSlot.putStack(heldStack);
+                        inventoryplayer.setItemStack(slotStack);
+                    }
+                } else if (slotStack.getItem() == heldStack.getItem() &&
+                        heldStack.getMaxStackSize() > 1 &&
+                        (!slotStack.getHasSubtypes() || slotStack.getMetadata() == heldStack.getMetadata()) &&
+                        ItemStack.areItemStackTagsEqual(slotStack, heldStack) && !slotStack.isEmpty()) {
+                    int stackCount = slotStack.getCount();
 
-    @Override
-    public boolean bogo$isEnabled() {
-        return isEnabled();
-    }
+                    if (stackCount + heldStack.getCount() <= heldStack.getMaxStackSize()) {
+                        heldStack.grow(stackCount);
+                        slotStack = fromSlot.decrStackSize(stackCount);
 
-    @Override
-    public boolean bogo$isItemValid(ItemStack stack) {
-        return isItemValid(stack);
-    }
+                        if (slotStack.isEmpty()) {
+                            fromSlot.putStack(ItemStack.EMPTY);
+                        }
 
-    @Override
-    public boolean bogo$canTakeStack(EntityPlayer player) {
-        return canTakeStack(player);
-    }
-
-    @Override
-    public void bogo$onSlotChanged() {
-        onSlotChanged();
-    }
-
-    @Override
-    public void bogo$onSlotChanged(ItemStack oldItem, ItemStack newItem) {
-        onSlotChange(oldItem, newItem);
-    }
-
-    @Override
-    public ItemStack bogo$onTake(EntityPlayer player, ItemStack itemStack) {
-        return onTake(player, itemStack);
-    }
-
-    @Override
-    public Result<ItemStack> transferStackInSlot(EntityPlayer playerIn, int index, List<ModularSlot> slots) {
+                        fromSlot.onTake(player, inventoryplayer.getItemStack());
+                    }
+                }
+                fromSlot.onSlotChanged();
+            }
+            return new Result<>(false, returnable);
+        }
         return new Result<>(true);
     }
 
     @Override
-    public Result<ItemStack> slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player, int dragEvent, int dragMode) {
-        return new Result<>(true);
-    }
+    public Result<ItemStack> transferStackInSlot(EntityPlayer playerIn, ModularSlot fromSlot, List<ModularSlot> slots) {
+        @Nullable SlotGroup fromSlotGroup = fromSlot.getSlotGroup();
+        ItemStack fromStack = fromSlot.getStack();
+        List<ModularSlot> emptySlots = new ArrayList<>();
+        for (ModularSlot toSlot : slots) {
+            SlotGroup slotGroup = Objects.requireNonNull(toSlot.getSlotGroup());
+            if (slotGroup != fromSlotGroup && toSlot.isEnabled() && toSlot.isItemValid(fromStack)) {
+                ItemStack toStack = toSlot.getStack().copy();
+                if (ItemHandlerHelper.canItemStacksStack(fromStack, toStack)) {
+                    int combined = toStack.getCount() + fromStack.getCount();
+                    int maxSize = toSlot.getSlotStackLimit();
 
-    @Override
-    public Result<Boolean> canDragIntoSlot(Slot slotIn) {
-        return new Result<>(true);
-    }
+                    if (combined <= maxSize) {
+                        fromStack.setCount(0);
+                        toStack.setCount(combined);
+                        toSlot.putStack(toStack);
+                    } else if (toStack.getCount() < maxSize) {
+                        fromStack.shrink(maxSize - toStack.getCount());
+                        toStack.setCount(maxSize);
+                        toSlot.putStack(toStack);
+                    }
 
-    @Override
-    public Result<Void> onContainerClosed(EntityPlayer playerIn) {
-        return new Result<>(true);
-    }
-
-    @Override
-    public Result<Boolean> canMergeSlot(ItemStack stack, Slot slotIn) {
-        return new Result<>(true);
+                    if (fromStack.isEmpty()) {
+                        return new Result<>(false, fromStack);
+                    }
+                } else if (toStack.isEmpty()) {
+                    emptySlots.add(toSlot);
+                }
+            }
+        }
+        for (ModularSlot emptySlot : emptySlots) {
+            if (fromStack.getCount() > emptySlot.getSlotStackLimit()) {
+                emptySlot.putStack(fromStack.splitStack(emptySlot.getSlotStackLimit()));
+            } else {
+                emptySlot.putStack(fromStack.splitStack(fromStack.getCount()));
+            }
+            if (fromStack.getCount() < 1) {
+                break;
+            }
+        }
+        return new Result<>(false, fromStack);
     }
 }

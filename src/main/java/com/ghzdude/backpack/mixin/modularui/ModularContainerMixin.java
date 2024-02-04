@@ -31,8 +31,8 @@ public abstract class ModularContainerMixin extends Container {
     @Unique
     @Inject(method = "slotClick", at = @At(value = "HEAD"), cancellable = true)
     private void slotClick(int slotId, int mouseButton, ClickType clickTypeIn, EntityPlayer player, CallbackInfoReturnable<ItemStack> cir) {
-        if (backpacks$validSlot(slotId) && getSlot(slotId) instanceof ISlotOverride slotOverride) {
-            var result = slotOverride.slotClick(slotId, mouseButton, clickTypeIn, player, getDragEvent(mouseButton), extractDragMode(mouseButton));
+        if (backpacks$validSlot(slotId) && this.slots.get(slotId) instanceof ISlotOverride slotOverride) {
+            var result = slotOverride.slotClick(this.slots.get(slotId), mouseButton, clickTypeIn, player, getDragEvent(mouseButton), extractDragMode(mouseButton));
             if (!result.callSuper()) {
                 cir.setReturnValue(result.getReturnable());
             }
@@ -42,8 +42,8 @@ public abstract class ModularContainerMixin extends Container {
     @Unique
     @Inject(method = "transferStackInSlot", at = @At(value = "HEAD"), cancellable = true)
     private void transferStackInSlot(EntityPlayer playerIn, int index, CallbackInfoReturnable<ItemStack> cir) {
-        if (backpacks$validSlot(index) && getSlot(index) instanceof ISlotOverride slotOverride) {
-            var result = slotOverride.transferStackInSlot(playerIn, index, this.shiftClickSlots);
+        if (backpacks$validSlot(index) && this.slots.get(index) instanceof ISlotOverride slotOverride) {
+            var result = slotOverride.transferStackInSlot(playerIn, this.slots.get(index), this.shiftClickSlots);
             if (!result.callSuper()) {
                 cir.setReturnValue(result.getReturnable());
             }
