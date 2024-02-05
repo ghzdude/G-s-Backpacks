@@ -76,7 +76,7 @@ public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
                         .filter(itemStack -> !BackpackItems.ITEMS.contains(itemStack.getItem()))
         ));
 
-        return new ModularPanel("backpack_gui").align(Alignment.Center)
+        return ModularPanel.defaultPanel("backpack_gui")
                 .padding(4, 7)
                 .child(new Column().sizeRel(1.0f)
                         .child(new Column().coverChildren()
