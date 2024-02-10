@@ -14,11 +14,11 @@ public interface ISlotOverride {
     int LEFT_MOUSE = 0;
     int RIGHT_MOUSE = 1;
 
-    default Result<ItemStack> transferStackInSlot(EntityPlayer playerIn, ModularSlot fromSlot, List<ModularSlot> slots) {
+    default Result<ItemStack> transferStackInSlot(EntityPlayer playerIn, List<ModularSlot> shiftClickSlots) {
         return new Result<>(true);
     }
 
-    default Result<ItemStack> slotClick(ModularSlot fromSlot, int mouseButton, ClickType clickTypeIn, EntityPlayer player, int dragEvent, int dragMode) {
+    default Result<ItemStack> slotClick(int mouseButton, ClickType clickTypeIn, EntityPlayer player, int dragEvent, int dragMode) {
         return new Result<>(true);
     }
 
@@ -37,13 +37,13 @@ public interface ISlotOverride {
     class Result<T> {
 
         @NotNull
-        private final boolean callSuper;
+        private final boolean shouldReturn;
 
         @Nullable
         private final T returnable;
 
-        public Result(@NotNull boolean callSuper, @Nullable T returnable) {
-            this.callSuper = callSuper;
+        public Result(boolean callSuper, @Nullable T returnable) {
+            this.shouldReturn = !callSuper;
             this.returnable = returnable;
         }
 
@@ -51,8 +51,8 @@ public interface ISlotOverride {
             this(callSuper, null);
         }
 
-        public boolean callSuper() {
-            return callSuper;
+        public boolean shouldReturn() {
+            return shouldReturn;
         }
 
         public T getReturnable() {

@@ -33,27 +33,27 @@ public class BackpackSlot extends BogoSlot implements ISlotOverride {
     }
 
     @Override
-    public Result<ItemStack> slotClick(ModularSlot fromSlot, int mouseButton, ClickType clickTypeIn, EntityPlayer player, int dragEvent, int dragMode) {
+    public Result<ItemStack> slotClick(int mouseButton, ClickType clickTypeIn, EntityPlayer player, int dragEvent, int dragMode) {
         ItemStack returnable = ItemStack.EMPTY;
         InventoryPlayer inventoryplayer = player.inventory;
 
         if ((clickTypeIn == ClickType.PICKUP) &&
                 (mouseButton == LEFT_MOUSE || mouseButton == RIGHT_MOUSE)) {
-            ItemStack slotStack = fromSlot.getStack().copy();
+            ItemStack slotStack = getStack().copy();
             ItemStack heldStack = inventoryplayer.getItemStack().copy();
 
             if (slotStack.isEmpty()) {
-                if (!heldStack.isEmpty() && fromSlot.isItemValid(heldStack)) {
+                if (!heldStack.isEmpty() && isItemValid(heldStack)) {
                     int stackCount = mouseButton == LEFT_MOUSE ? heldStack.getCount() : 1;
 
-                    if (stackCount > fromSlot.getItemStackLimit(heldStack)) {
-                        stackCount = fromSlot.getItemStackLimit(heldStack);
+                    if (stackCount > getItemStackLimit(heldStack)) {
+                        stackCount = getItemStackLimit(heldStack);
                     }
 
-                    fromSlot.putStack(heldStack.splitStack(stackCount));
+                    putStack(heldStack.splitStack(stackCount));
                     inventoryplayer.setItemStack(heldStack);
                 }
-            } else if (fromSlot.canTakeStack(player)) {
+            } else if (canTakeStack(player)) {
                 if (heldStack.isEmpty() && !slotStack.isEmpty()) {
 
                     int toRemove = Math.min(slotStack.getMaxStackSize(),
@@ -62,26 +62,26 @@ public class BackpackSlot extends BogoSlot implements ISlotOverride {
                                 (slotStack.getCount() + 1) / 2);
 
                     inventoryplayer.setItemStack(slotStack.splitStack(toRemove));
-                    fromSlot.putStack(slotStack);
+                    putStack(slotStack);
 
-                    fromSlot.onTake(player, inventoryplayer.getItemStack());
-                } else if (fromSlot.isItemValid(heldStack)) {
+                    onTake(player, inventoryplayer.getItemStack());
+                } else if (isItemValid(heldStack)) {
                     if (slotStack.getItem() == heldStack.getItem() &&
                             slotStack.getMetadata() == heldStack.getMetadata() &&
                             ItemStack.areItemStackTagsEqual(slotStack, heldStack)) {
                         int stackCount = mouseButton == LEFT_MOUSE ? heldStack.getCount() : 1;
 
-                        if (stackCount > fromSlot.getItemStackLimit(heldStack) - slotStack.getCount()) {
-                            stackCount = fromSlot.getItemStackLimit(heldStack) - slotStack.getCount();
+                        if (stackCount > getItemStackLimit(heldStack) - slotStack.getCount()) {
+                            stackCount = getItemStackLimit(heldStack) - slotStack.getCount();
                         }
 
                         heldStack.shrink(stackCount);
                         slotStack.grow(stackCount);
-                        fromSlot.putStack(slotStack);
+                        putStack(slotStack);
                         inventoryplayer.setItemStack(heldStack);
 
-                    } else if (heldStack.getCount() <= fromSlot.getItemStackLimit(heldStack)) {
-                        fromSlot.putStack(heldStack);
+                    } else if (heldStack.getCount() <= getItemStackLimit(heldStack)) {
+                        putStack(heldStack);
                         inventoryplayer.setItemStack(slotStack);
                     }
                 } else if (slotStack.getItem() == heldStack.getItem() &&
@@ -92,16 +92,16 @@ public class BackpackSlot extends BogoSlot implements ISlotOverride {
 
                     if (stackCount + heldStack.getCount() <= heldStack.getMaxStackSize()) {
                         heldStack.grow(stackCount);
-                        slotStack = fromSlot.decrStackSize(stackCount);
+                        slotStack = decrStackSize(stackCount);
 
                         if (slotStack.isEmpty()) {
-                            fromSlot.putStack(ItemStack.EMPTY);
+                            putStack(ItemStack.EMPTY);
                         }
 
-                        fromSlot.onTake(player, inventoryplayer.getItemStack());
+                        onTake(player, inventoryplayer.getItemStack());
                     }
                 }
-                fromSlot.onSlotChanged();
+                onSlotChanged();
             }
             return new Result<>(false, returnable);
         }
@@ -109,11 +109,12 @@ public class BackpackSlot extends BogoSlot implements ISlotOverride {
     }
 
     @Override
-    public Result<ItemStack> transferStackInSlot(EntityPlayer playerIn, ModularSlot fromSlot, List<ModularSlot> slots) {
-        @Nullable SlotGroup fromSlotGroup = fromSlot.getSlotGroup();
-        ItemStack fromStack = fromSlot.getStack();
+    public Result<ItemStack> transferStackInSlot(EntityPlayer playerIn, List<ModularSlot> shiftClickSlots) {
+        @Nullable SlotGroup fromSlotGroup = getSlotGroup();
+        ItemStack fromStack = getStack().copy();
         List<ModularSlot> emptySlots = new ArrayList<>();
-        for (ModularSlot toSlot : slots) {
+
+        for (ModularSlot toSlot : shiftClickSlots) {
             SlotGroup slotGroup = Objects.requireNonNull(toSlot.getSlotGroup());
             if (slotGroup != fromSlotGroup && toSlot.isEnabled() && toSlot.isItemValid(fromStack)) {
                 ItemStack toStack = toSlot.getStack().copy();
@@ -147,7 +148,7 @@ public class BackpackSlot extends BogoSlot implements ISlotOverride {
             else {
                 emptySlot.putStack(fromStack.splitStack(fromStack.getCount()));
             }
-            fromSlot.putStack(fromStack);
+            putStack(fromStack);
             break;
         }
         return new Result<>(false, fromStack);

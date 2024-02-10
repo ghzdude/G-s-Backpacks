@@ -3,8 +3,6 @@ package com.ghzdude.backpack.mixin.modularui;
 import com.cleanroommc.modularui.screen.ModularContainer;
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import com.ghzdude.backpack.api.ISlotOverride;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ClickType;
@@ -32,8 +30,8 @@ public abstract class ModularContainerMixin extends Container {
     @Inject(method = "slotClick", at = @At(value = "HEAD"), cancellable = true)
     private void slotClick(int slotId, int mouseButton, ClickType clickTypeIn, EntityPlayer player, CallbackInfoReturnable<ItemStack> cir) {
         if (backpacks$validSlot(slotId) && this.slots.get(slotId) instanceof ISlotOverride slotOverride) {
-            var result = slotOverride.slotClick(this.slots.get(slotId), mouseButton, clickTypeIn, player, getDragEvent(mouseButton), extractDragMode(mouseButton));
-            if (!result.callSuper()) {
+            var result = slotOverride.slotClick(mouseButton, clickTypeIn, player, getDragEvent(mouseButton), extractDragMode(mouseButton));
+            if (result.shouldReturn()) {
                 cir.setReturnValue(result.getReturnable());
             }
         }
@@ -43,8 +41,8 @@ public abstract class ModularContainerMixin extends Container {
     @Inject(method = "transferStackInSlot", at = @At(value = "HEAD"), cancellable = true)
     private void transferStackInSlot(EntityPlayer playerIn, int index, CallbackInfoReturnable<ItemStack> cir) {
         if (backpacks$validSlot(index) && this.slots.get(index) instanceof ISlotOverride slotOverride) {
-            var result = slotOverride.transferStackInSlot(playerIn, this.slots.get(index), this.shiftClickSlots);
-            if (!result.callSuper()) {
+            var result = slotOverride.transferStackInSlot(playerIn, this.shiftClickSlots);
+            if (result.shouldReturn()) {
                 cir.setReturnValue(result.getReturnable());
             }
         }
@@ -54,7 +52,7 @@ public abstract class ModularContainerMixin extends Container {
     public boolean canDragIntoSlot(Slot slotIn) {
         if (slotIn instanceof ISlotOverride slotOverride) {
             var result = slotOverride.canDragIntoSlot(slotIn);
-            if (!result.callSuper()) {
+            if (result.shouldReturn()) {
                 return Boolean.TRUE.equals(result.getReturnable());
             }
         }
@@ -65,7 +63,7 @@ public abstract class ModularContainerMixin extends Container {
     public boolean canMergeSlot(ItemStack stack, Slot slotIn) {
         if (slotIn instanceof ISlotOverride slotOverride) {
             var result = slotOverride.canMergeSlot(stack, slotIn);
-            if (!result.callSuper()) {
+            if (result.shouldReturn()) {
                 return Boolean.TRUE.equals(result.getReturnable());
             }
         }
@@ -88,7 +86,7 @@ public abstract class ModularContainerMixin extends Container {
                              @Local(ordinal = 1) ModularSlot toSlot) {
         if (toSlot instanceof ISlotOverride slotOverride) {
             var result = slotOverride.insertStack(fromStack);
-            if (!result.callSuper()) {
+            if (result.shouldReturn()) {
                 var stack = result.getReturnable();
                 cir.setReturnValue(stack == null ? ItemStack.EMPTY : stack);
             }
