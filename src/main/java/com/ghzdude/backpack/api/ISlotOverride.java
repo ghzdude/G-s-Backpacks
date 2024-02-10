@@ -26,11 +26,11 @@ public interface ISlotOverride {
         return new Result<>(true);
     }
 
-    default Result<Void> onContainerClosed(EntityPlayer playerIn) {
+    default Result<Boolean> canMergeSlot(ItemStack stack, Slot slotIn) {
         return new Result<>(true);
     }
 
-    default Result<Boolean> canMergeSlot(ItemStack stack, Slot slotIn) {
+    default Result<ItemStack> insertStack(ItemStack stack) {
         return new Result<>(true);
     }
 

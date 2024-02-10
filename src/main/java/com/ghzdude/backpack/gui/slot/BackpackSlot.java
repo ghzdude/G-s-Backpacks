@@ -152,4 +152,23 @@ public class BackpackSlot extends BogoSlot implements ISlotOverride {
         }
         return new Result<>(false, fromStack);
     }
+
+    @Override
+    public Result<ItemStack> insertStack(ItemStack stack) {
+        ItemStack toStack = getStack().copy();
+        int combined = toStack.getCount() + stack.getCount();
+        int maxSize = getSlotStackLimit();
+
+        if (combined <= maxSize) {
+            stack.setCount(0);
+            toStack.setCount(combined);
+            putStack(toStack);
+        } else if (toStack.getCount() < maxSize) {
+            stack.shrink(maxSize - toStack.getCount());
+            toStack.setCount(maxSize);
+            putStack(toStack);
+        }
+
+        return new Result<>(false, stack);
+    }
 }

@@ -62,19 +62,6 @@ public abstract class ModularContainerMixin extends Container {
     }
 
     @Override
-    public void onContainerClosed(EntityPlayer playerIn) {
-        for (ModularSlot slot : this.slots) {
-            if (slot instanceof ISlotOverride slotOverride) {
-                var result = slotOverride.onContainerClosed(playerIn);
-                if (result.callSuper()) {
-                    super.onContainerClosed(playerIn);
-                }
-            }
-        }
-        super.onContainerClosed(playerIn);
-    }
-
-    @Override
     public boolean canMergeSlot(ItemStack stack, Slot slotIn) {
         if (slotIn instanceof ISlotOverride slotOverride) {
             var result = slotOverride.canMergeSlot(stack, slotIn);
@@ -85,10 +72,27 @@ public abstract class ModularContainerMixin extends Container {
         return super.canMergeSlot(stack, slotIn);
     }
 
-    @WrapOperation(method = "transferItem",
-            at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I"))
-    private int wrapMin(int slotLimit, int stackLimit, Operation<Integer> min, @Local(ordinal = 1) ModularSlot toSlot) {
-        return toSlot.isIgnoreMaxStackSize() ? slotLimit : min.call(slotLimit, stackLimit);
+    @Inject(method = "transferItem",
+            cancellable = true,
+            at = {
+            @At(value = "INVOKE_ASSIGN",
+                target = "Lnet/minecraft/item/ItemStack;getCount()I",
+                ordinal = 1,
+                shift = At.Shift.BEFORE),
+            @At(value = "INVOKE",
+                target = "Lnet/minecraft/item/ItemStack;getCount()I",
+                ordinal = 5,
+                shift = At.Shift.BEFORE)
+    })
+    private void insertStack(ModularSlot fromSlot, ItemStack fromStack, CallbackInfoReturnable<ItemStack> cir,
+                             @Local(ordinal = 1) ModularSlot toSlot) {
+        if (toSlot instanceof ISlotOverride slotOverride) {
+            var result = slotOverride.insertStack(fromStack);
+            if (!result.callSuper()) {
+                var stack = result.getReturnable();
+                cir.setReturnValue(stack == null ? ItemStack.EMPTY : stack);
+            }
+        }
     }
 
     @Unique
