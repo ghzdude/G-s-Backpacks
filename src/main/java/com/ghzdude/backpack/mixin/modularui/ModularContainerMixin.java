@@ -51,10 +51,7 @@ public abstract class ModularContainerMixin extends Container {
     @Override
     public boolean canDragIntoSlot(Slot slotIn) {
         if (slotIn instanceof backpacks$SlotOverride slotOverride) {
-            var result = slotOverride.canDragIntoSlot(slotIn);
-            if (result.shouldReturn()) {
-                return Boolean.TRUE.equals(result.getReturnable());
-            }
+            return slotOverride.canDragIntoSlot();
         }
         return super.canDragIntoSlot(slotIn);
     }
@@ -62,10 +59,7 @@ public abstract class ModularContainerMixin extends Container {
     @Override
     public boolean canMergeSlot(ItemStack stack, Slot slotIn) {
         if (slotIn instanceof backpacks$SlotOverride slotOverride) {
-            var result = slotOverride.canMergeSlot(stack, slotIn);
-            if (result.shouldReturn()) {
-                return Boolean.TRUE.equals(result.getReturnable());
-            }
+            return slotOverride.canBeMerged(stack);
         }
         return super.canMergeSlot(stack, slotIn);
     }

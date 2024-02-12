@@ -3,7 +3,6 @@ package com.ghzdude.backpack.api;
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ClickType;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,12 +21,12 @@ public interface backpacks$SlotOverride {
         return new Result<>(true);
     }
 
-    default Result<Boolean> canDragIntoSlot(Slot slotIn) {
-        return new Result<>(true);
+    default boolean canDragIntoSlot() {
+        return true;
     }
 
-    default Result<Boolean> canMergeSlot(ItemStack stack, Slot slotIn) {
-        return new Result<>(true);
+    default boolean canBeMerged(ItemStack stack) {
+        return true;
     }
 
     default Result<ItemStack> insertStack(ItemStack stack) {
