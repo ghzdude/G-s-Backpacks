@@ -43,7 +43,7 @@ public class CommonProxy {
     public static void onPickup(EntityItemPickupEvent event) {
         var playerTag = event.getEntityPlayer().getEntityData();
         var toInsert = event.getItem().getItem();
-        byte i = playerTag.hasKey(CACHE) ? playerTag.getByte(CACHE) : 0;
+        byte i = playerTag.getByte(CACHE);
 
         ItemStack cachedStack = event.getEntityPlayer().inventory.getStackInSlot(i);
         ItemStack returnable = toInsert.copy();

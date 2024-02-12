@@ -2,55 +2,89 @@ package com.ghzdude.backpack.mixin.modularui;
 
 import com.cleanroommc.modularui.screen.ModularContainer;
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.ghzdude.backpack.api.backpacks$SlotOverride;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.List;
+
 @Mixin(value = ModularContainer.class, remap = false)
 public abstract class ModularContainerMixin extends Container {
 
-    @WrapOperation(method = "slotClick", at = {
-            @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getCount()I", ordinal = 1),
-            @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getCount()I", ordinal = 2)
-    })
-    private int clampClickPickup(ItemStack instance, Operation<Integer> original) {
-        return Math.min(instance.getCount(), instance.getMaxStackSize());
-    }
-    @WrapOperation(method = "slotClick", at = {
-            @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getMaxStackSize()I", ordinal = 0),
-            @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getMaxStackSize()I", ordinal = 1)
-    })
-    private int clampClickOverflow(ItemStack instance, Operation<Integer> original, @Local Slot clickedSlot) {
-        if (clickedSlot instanceof ModularSlot mSlot && mSlot.isIgnoreMaxStackSize()) {
-            return mSlot.getSlotStackLimit();
-        }
-        return original.call(instance);
-    }
+    @Shadow @Final private List<ModularSlot> slots;
 
-    @Inject(method = "slotClick",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/inventory/Slot;putStack(Lnet/minecraft/item/ItemStack;)V",
-                    ordinal = 3, shift = At.Shift.BEFORE), cancellable = true)
-    private void fixClickSwap(int slotId, int mouseButton, ClickType clickTypeIn, EntityPlayer player,
-                     CallbackInfoReturnable<ItemStack> cir, @Local(ordinal = 1) ItemStack slotStack,
-                              @Local(ordinal = 0) ItemStack ret) {
-        if (slotStack.getCount() > slotStack.getMaxStackSize()) {
-            cir.setReturnValue(ret);
+    @Shadow @Final private List<ModularSlot> shiftClickSlots;
+
+    @Unique
+    @Inject(method = "slotClick", at = @At(value = "HEAD"), cancellable = true)
+    private void slotClick(int slotId, int mouseButton, ClickType clickTypeIn, EntityPlayer player, CallbackInfoReturnable<ItemStack> cir) {
+        if (backpacks$validSlot(slotId) && this.slots.get(slotId) instanceof backpacks$SlotOverride slotOverride) {
+            var result = slotOverride.slotClick(mouseButton, clickTypeIn, player, getDragEvent(mouseButton), extractDragMode(mouseButton));
+            if (result.shouldReturn()) {
+                cir.setReturnValue(result.getReturnable());
+            }
         }
     }
 
-    @WrapOperation(method = "transferItem",
-            at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I"))
-    private int wrapMin(int slotLimit, int stackLimit, Operation<Integer> min, @Local(ordinal = 1) ModularSlot toSlot) {
-        return toSlot.isIgnoreMaxStackSize() ? slotLimit : min.call(slotLimit, stackLimit);
+    @Unique
+    @Inject(method = "transferStackInSlot", at = @At(value = "HEAD"), cancellable = true)
+    private void transferStackInSlot(EntityPlayer playerIn, int index, CallbackInfoReturnable<ItemStack> cir) {
+        if (backpacks$validSlot(index) && this.slots.get(index) instanceof backpacks$SlotOverride slotOverride) {
+            var result = slotOverride.transferStackInSlot(playerIn, this.shiftClickSlots);
+            if (result.shouldReturn()) {
+                cir.setReturnValue(result.getReturnable());
+            }
+        }
+    }
+
+    @Override
+    public boolean canDragIntoSlot(Slot slotIn) {
+        if (slotIn instanceof backpacks$SlotOverride slotOverride) {
+            return slotOverride.canDragIntoSlot();
+        }
+        return super.canDragIntoSlot(slotIn);
+    }
+
+    @Override
+    public boolean canMergeSlot(ItemStack stack, Slot slotIn) {
+        if (slotIn instanceof backpacks$SlotOverride slotOverride) {
+            return slotOverride.canBeMerged(stack);
+        }
+        return super.canMergeSlot(stack, slotIn);
+    }
+
+    @Inject(method = "transferItem",
+            cancellable = true,
+            at = {
+                @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/item/ItemStack;getCount()I",
+                    ordinal = 1, shift = At.Shift.BEFORE),
+                @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getCount()I",
+                    ordinal = 5, shift = At.Shift.BEFORE)
+    })
+    private void insertStack(ModularSlot fromSlot, ItemStack fromStack, CallbackInfoReturnable<ItemStack> cir,
+                             @Local(ordinal = 1) ModularSlot toSlot) {
+        if (toSlot instanceof backpacks$SlotOverride slotOverride) {
+            var result = slotOverride.insertStack(fromStack);
+            if (result.shouldReturn()) {
+                var stack = result.getReturnable();
+                cir.setReturnValue(stack == null ? ItemStack.EMPTY : stack);
+            }
+        }
+    }
+
+    @Unique
+    private boolean backpacks$validSlot(int slot) {
+        return slot >= 0 && slot < this.slots.size();
     }
 }
