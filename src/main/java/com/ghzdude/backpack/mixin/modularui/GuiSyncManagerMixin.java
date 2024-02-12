@@ -14,11 +14,16 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(GuiSyncManager.class)
 public class GuiSyncManagerMixin {
 
-    @Shadow @Final private PlayerMainInvWrapper playerInventory;
+    @Final
+    @Shadow(remap = false)
+    private PlayerMainInvWrapper playerInventory;
 
-    @Shadow @Final private static String PLAYER_INVENTORY;
+    @Final
+    @Shadow(remap = false)
+    private static String PLAYER_INVENTORY;
 
     @WrapOperation(method = "<init>",
+            remap = false,
             at = @At(value = "INVOKE",
                     target = "Lcom/cleanroommc/modularui/value/sync/GuiSyncManager;itemSlot(" +
                             "Ljava/lang/String;" +
