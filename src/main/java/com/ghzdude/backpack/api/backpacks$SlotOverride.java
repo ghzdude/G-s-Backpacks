@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public interface ISlotOverride {
+public interface backpacks$SlotOverride {
     int LEFT_MOUSE = 0;
     int RIGHT_MOUSE = 1;
 

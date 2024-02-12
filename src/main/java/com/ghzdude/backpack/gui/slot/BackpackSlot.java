@@ -2,7 +2,7 @@ package com.ghzdude.backpack.gui.slot;
 
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import com.cleanroommc.modularui.widgets.slot.SlotGroup;
-import com.ghzdude.backpack.api.ISlotOverride;
+import com.ghzdude.backpack.api.backpacks$SlotOverride;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.ClickType;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class BackpackSlot extends BogoSlot implements ISlotOverride {
+public class BackpackSlot extends BogoSlot implements backpacks$SlotOverride {
 
     public BackpackSlot(IItemHandler itemHandler, int index) {
         super(itemHandler, index);
