@@ -28,14 +28,12 @@ import net.minecraftforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
-    int tier;
+public class BulkBackpack extends Item implements IGuiHolder<HandGuiData> {
     public static final String SYNC_NAME = "backpack_inventory";
 
     private static final int BASE_STACK_SIZE = 4096;
     private static final int BASE_SLOT_SIZE = 27;
-    public BackpackItem(ResourceLocation name, int tier) {
-        this.tier = tier;
+    public BulkBackpack(ResourceLocation name) {
         setRegistryName(name);
         setCreativeTab(CreativeTabs.TOOLS);
         setTranslationKey(name.getPath());
@@ -56,18 +54,6 @@ public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
         var backpack = new SlotGroup(SYNC_NAME, 9, 200, true);
         syncManager.registerSlotGroup(backpack);
 
-        var builder = SlotGroupWidget.builder();
-
-        for (int i = 0; i < 3; i++) {
-            builder.row("XXXXXXXXX");
-        }
-
-        builder.key('X', i -> new ItemSlot()
-                .slot(new BackpackSlot(itemHandler, i)
-                        .slotGroup(backpack)
-                        .filter(itemStack -> !BackpackItems.ITEMS.contains(itemStack.getItem()))
-        ));
-
         return ModularPanel.defaultPanel("backpack_gui")
                 .padding(4, 7)
                 .child(new Column().sizeRel(1.0f)
@@ -76,7 +62,15 @@ public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
                                         .asWidget()
                                         .left(0)
                                         .marginBottom(6))
-                                .child(builder.build()))
+                                .child(SlotGroupWidget.builder()
+                                        .matrix("XXXXXXXXX",
+                                                "XXXXXXXXX",
+                                                "XXXXXXXXX")
+                                        .key('X', i -> new ItemSlot()
+                                                .slot(new BackpackSlot(itemHandler, i)
+                                                        .slotGroup(backpack)
+                                                        .filter(itemStack -> !BackpackItems.ITEMS.contains(itemStack.getItem()))))
+                                        .build()))
                         .child(SlotGroupWidget.playerInventory()
                                 .leftRel(0.5f)
                                 .bottom(0)));
@@ -85,30 +79,22 @@ public class BackpackItem extends Item implements IGuiHolder<HandGuiData> {
     @Nullable
     @Override
     public ICapabilityProvider initCapabilities(@NotNull ItemStack stack, @Nullable NBTTagCompound nbt) {
-        return new BackpackProvider(stack);
-    }
+        return new ItemCapabilityProvider() {
+            private final BackpackHandler handler = new BackpackHandler(stack, BASE_SLOT_SIZE, BASE_STACK_SIZE);
 
-    protected class BackpackProvider implements ItemCapabilityProvider {
-        private final BackpackHandler handler;
-
-        protected BackpackProvider(ItemStack stack) {
-            int slots = tier == 0 ? BASE_SLOT_SIZE : BASE_SLOT_SIZE * 2;
-            int stackSize = tier == 0 ? BASE_STACK_SIZE : BASE_STACK_SIZE * 16;
-            handler = new BackpackHandler(stack, slots, stackSize);
-        }
-        
-        @Override
-        public <T> @Nullable T getCapability(@NotNull Capability<T> capability) {
-            if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-                return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(handler);
+            @Override
+            public <T> @Nullable T getCapability(@NotNull Capability<T> capability) {
+                if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+                    return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(handler);
+                }
+                return null;
             }
-            return null;
-        }
 
-        @Override
-        public boolean hasCapability(@NotNull Capability<?> capability, @Nullable EnumFacing facing) {
-            return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
-        }
+            @Override
+            public boolean hasCapability(@NotNull Capability<?> capability, @Nullable EnumFacing facing) {
+                return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
+            }
+        };
     }
 
     protected IItemHandler getHandler(ItemStack stack) {

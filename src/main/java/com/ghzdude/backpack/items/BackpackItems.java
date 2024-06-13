@@ -7,14 +7,21 @@ import net.minecraft.util.ResourceLocation;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * Items:
+ * - Bulk Backpack - stores items up to a stack size of 4096, option to store items on pickup, no NBT or tools
+ * - Large Backpack - stores many slots of items up to max stack size
+ * - Crafting Backpack - stores items and has a 3x3 crafting grid
+ * - Fluid Backpack - stores a few fluid tanks, and some slots for items
+ * - Tool Backpack - stores damage-able items like tools and weapons
+ */
 public class BackpackItems {
 
     public static final List<Item> ITEMS = new ArrayList<>();
 
-    public static final Item BULK_BACKPACK = new BackpackItem(new ResourceLocation(BackpacksMod.MODID, "bulk_basic"), 0);
-    //todo large bulk backpack
-    //todo tool backpack
-    //todo fluid backpack?
-//    public static final Item LARGE_BACKPACK = new BackpackItem(new ResourceLocation(BackpacksMod.MODID, "large"), 1);
-//    public static final Item MASSIVE_BACKPACK = new BackpackItem(new ResourceLocation(BackpacksMod.MODID, "massive"), 2);
+    public static final Item BULK_BACKPACK = new BulkBackpack(location("bulk_basic"));
+
+    public static ResourceLocation location(String path) {
+        return new ResourceLocation(BackpacksMod.MODID, path);
+    }
 }
