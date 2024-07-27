@@ -1,1 +1,5 @@
-item.bulk_basic.name=Basic Bulk Backpack
+item.bulk_basic.name=Bulk Backpack
+item.large_backpack.name=Bulk Backpack
+item.crafting_backpack.name=Bulk Backpack
+item.fluid_backpack.name=Bulk Backpack
+item.tool_backpack.name=Bulk Backpack

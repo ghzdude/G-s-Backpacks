@@ -1,6 +1,7 @@
 package com.ghzdude.backpack.handler;
 
 import com.cleanroommc.modularui.utils.ItemStackItemHandler;
+import com.ghzdude.backpack.items.BackpackItems;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -17,7 +18,7 @@ public class BackpackHandler extends ItemStackItemHandler {
 
     @Override
     public boolean isItemValid(int slot, @NotNull ItemStack stack) {
-        return insertItem(slot, stack, true).isEmpty();
+        return !BackpackItems.ITEMS.contains(stack.getItem());
     }
 
     @Override

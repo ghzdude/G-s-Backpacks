@@ -1,6 +1,7 @@
 package com.ghzdude.backpack.items;
 
 import com.ghzdude.backpack.BackpacksMod;
+import com.ghzdude.backpack.api.BaseBackpackItem;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 
@@ -19,7 +20,8 @@ public class BackpackItems {
 
     public static final List<Item> ITEMS = new ArrayList<>();
 
-    public static final Item BULK_BACKPACK = new BulkBackpack(location("bulk_basic"));
+    public static final BaseBackpackItem BULK_BACKPACK = new BulkBackpack(location("bulk_basic"));
+    public static final BaseBackpackItem LARGE_BACKPACK = new LargeBackpack(location("large_backpack"));
 
     public static ResourceLocation location(String path) {
         return new ResourceLocation(BackpacksMod.MODID, path);
