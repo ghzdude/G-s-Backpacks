@@ -1,8 +1,7 @@
 package com.ghzdude.backpack.items;
 
 import com.cleanroommc.modularui.api.drawable.IKey;
-import com.cleanroommc.modularui.factory.HandGuiData;
-import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.cleanroommc.modularui.widgets.ItemSlot;
 import com.cleanroommc.modularui.widgets.SlotGroupWidget;
@@ -12,25 +11,27 @@ import com.ghzdude.backpack.api.BaseBackpackItem;
 import com.ghzdude.backpack.gui.slot.BackpackSlot;
 import com.ghzdude.backpack.handler.BackpackHandler;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.*;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.IItemHandler;
 
 public class BulkBackpack extends BaseBackpackItem {
+
+    protected static final int BASE_STACK_SIZE = 4096;
+    protected static final int BASE_SLOT_SIZE = 27;
 
     public BulkBackpack(ResourceLocation name) {
         super(name);
     }
 
     @Override
-    public ModularPanel buildUI(HandGuiData data, PanelSyncManager syncManager) {
-        IItemHandler handler = getHandler(data.getUsedItemStack());
-        var backpack = new SlotGroup(SYNC_NAME, 9, 200, true);
-        syncManager.registerSlotGroup(backpack);
+    protected IWidget createBackpackUI(ItemStack backpack, PanelSyncManager syncManager) {
+        IItemHandler handler = getHandler(backpack);
+        SlotGroup backpackGroup = new SlotGroup(SYNC_NAME, 9, 200, true);
+        syncManager.registerSlotGroup(backpackGroup);
 
-        return getTemplatePanel()
-                .child(new Column().sizeRel(1.0f)
+        return new Column().sizeRel(1.0f)
                         .child(new Column().coverChildren()
-                                .child(IKey.lang(data.getUsedItemStack().getDisplayName())
+                                .child(IKey.lang(backpack.getDisplayName())
                                         .asWidget()
                                         .left(0)
                                         .marginBottom(6))
@@ -40,12 +41,12 @@ public class BulkBackpack extends BaseBackpackItem {
                                                 "XXXXXXXXX")
                                         .key('X', i -> new ItemSlot()
                                                 .slot(new BackpackSlot(handler, i)
-                                                        .slotGroup(backpack)
+                                                        .slotGroup(backpackGroup)
                                                         .filter(itemStack -> handler.isItemValid(i, itemStack))))
                                         .build()))
                         .child(SlotGroupWidget.playerInventory()
                                 .leftRel(0.5f)
-                                .bottom(0)));
+                                .bottom(0));
     }
 
     @Override

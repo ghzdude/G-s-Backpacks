@@ -1,10 +1,12 @@
 package com.ghzdude.backpack.api;
 
 import com.cleanroommc.modularui.api.IGuiHolder;
+import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.factory.HandGuiData;
 import com.cleanroommc.modularui.factory.ItemGuiFactory;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.utils.ItemCapabilityProvider;
+import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.ghzdude.backpack.items.BackpackItems;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -23,8 +25,6 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class BaseBackpackItem extends Item implements IGuiHolder<HandGuiData> {
     protected static final String SYNC_NAME = "backpack_inventory";
-    protected static final int BASE_STACK_SIZE = 4096;
-    protected static final int BASE_SLOT_SIZE = 27;
     private final String guiName;
 
     public BaseBackpackItem(ResourceLocation name) {
@@ -71,8 +71,12 @@ public abstract class BaseBackpackItem extends Item implements IGuiHolder<HandGu
 
     protected abstract IItemHandler createHandler(ItemStack container);
 
-    protected final ModularPanel getTemplatePanel() {
+    @Override
+    public final ModularPanel buildUI(HandGuiData data, PanelSyncManager syncManager) {
         return ModularPanel.defaultPanel(guiName)
-                .padding(4, 7);
+                .padding(4, 7)
+                .child(createBackpackUI(data.getUsedItemStack(), syncManager));
     }
+
+    protected abstract IWidget createBackpackUI(ItemStack backpack, PanelSyncManager syncManager);
 }
