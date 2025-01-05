@@ -21,6 +21,9 @@ import net.minecraftforge.registries.IForgeRegistry;
 
 @Mod.EventBusSubscriber(modid = BackpacksMod.MODID)
 public class CommonProxy {
+
+    private static final String CACHE = "backpack_cache";
+
     @SubscribeEvent
     public static void itemRegister(RegistryEvent.Register<Item> event) {
         IForgeRegistry<Item> registry = event.getRegistry();
@@ -37,7 +40,6 @@ public class CommonProxy {
         }
     }
 
-    private static final String CACHE = "backpack_cache";
     @SuppressWarnings("DataFlowIssue")
     @SubscribeEvent
     public static void onPickup(EntityItemPickupEvent event) {
@@ -85,7 +87,6 @@ public class CommonProxy {
 
             } else if (ItemHandlerHelper.canItemStacksStack(ourStack, stack) && handler.getSlotLimit(i) - ourStack.getCount() > 0) {
                 matchingSlots.add(i);
-
             }
         }
 
