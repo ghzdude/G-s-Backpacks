@@ -6,10 +6,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.items.IItemHandler;
 
-@Optional.Interface(modid = "bogosort", iface = "com.cleanroommc.bogosorter.api.ISlot")
 public class BogoSlot extends ModularSlot implements ISlot {
 
     public BogoSlot(IItemHandler itemHandler, int index) {
